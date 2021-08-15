@@ -1,0 +1,40 @@
+version: '3'
+services:
+
+    node:
+        image: pachirapachira/minikubereact:1.0
+        ports:
+            - "3000:3000"
+        environment:
+            REACT_APP_REST_API_ENDPOINT: "http://127.0.0.1:8000"
+
+    app:
+        image: pachirapachira/minikubedjango:1.1
+        command: >
+            bash -c 'sleep 10 && python manage.py migrate && python3 manage.py runserver 0.0.0.0:8000'
+        ports:
+            - "8000:8000"
+        environment:
+            SECRET_KEY: "django-insecure-g@ww%@j*fj+*p8se@*e9iqs9nnci0&5s)9e5)3^2ajoc^47hvu"
+            DEBUG: 0
+            DATABASE_ENGINE: django.db.backends.mysql
+            DATABASE_DB: django-db
+            DATABASE_USER: django
+            DATABASE_PASSWORD: django
+            DATABASE_HOST: db
+            DATABASE_PORT: "3306"
+            CORS_ORIGIN_WHITELIST_ELEMENT: "http://127.0.0.1:3000"
+        depends_on:
+            - "db"
+
+    db:
+        image: mysql:5.7
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: django-db
+            MYSQL_USER: django
+            MYSQL_PASSWORD: django
+            TZ: 'Asia/Tokyo'
+        command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+        ports:
+            - "3306:3306"
